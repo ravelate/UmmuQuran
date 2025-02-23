@@ -1,0 +1,39 @@
+{
+  "ramadan": [
+    {
+      "id": 1,
+      "title": "Reading book",
+      "date": "2025-02-28",
+      "startTime": "16:00",
+      "priorityLevel": "High"
+    },
+    {
+      "id": 2,
+      "title": "Walking every morning",
+      "date": "2025-02-28",
+      "startTime": "06:30",
+      "priorityLevel": "Medium"
+    },
+    {
+      "id": 3,
+      "title": "Coding practice",
+      "date": "2025-02-28",
+      "startTime": "10:00",
+      "priorityLevel": "High"
+    },
+    {
+      "id": 4,
+      "title": "Writing journal",
+      "date": "2025-02-28",
+      "startTime": "20:30",
+      "priorityLevel": "Low"
+    },
+    {
+      "id": 5,
+      "title": "Self Retrospection",
+      "date": "2025-02-28",
+      "startTime": "21:00",
+      "priorityLevel": "Low"
+    }
+  ]
+}

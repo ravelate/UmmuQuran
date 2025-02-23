@@ -2,6 +2,7 @@ package com.felina.ummuquran
 
 import android.app.Application
 import com.felina.ummuquran.di.appModule
+import com.felina.ummuquran.di.databaseModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.GlobalContext.startKoin
 
@@ -11,6 +12,7 @@ class App : Application() {
         startKoin {
             androidContext(this@App)
             modules(appModule)
+            modules(databaseModule)
         }
     }
 }

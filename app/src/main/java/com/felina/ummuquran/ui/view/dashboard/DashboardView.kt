@@ -1,304 +1,334 @@
 package com.felina.ummuquran.ui.view.dashboard
 
-import android.content.Intent
-import android.widget.Toast
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.KeyboardArrowDown
-import androidx.compose.material.icons.rounded.KeyboardArrowUp
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.ui.text.TextStyle
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.app.ShareCompat
-import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.NavHostController
-import com.felina.ummuquran.MainActivity
-import kotlinx.coroutines.GlobalScope.coroutineContext
+import androidx.navigation.compose.currentBackStackEntryAsState
+import com.felina.ummuquran.ui.source.CalendarDataSource
+import com.felina.ummuquran.ui.source.CalendarUiModel
+import com.felina.ummuquran.ui.view.NavDestination
+import com.felina.ummuquran.ui.view.read.ShimmerPlaceholder
 import org.koin.androidx.compose.koinViewModel
+import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.chrono.HijrahDate
+import java.time.format.DateTimeFormatter
+import java.util.Calendar
+import java.util.Locale
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DashboadView(
+fun DashboardView(
     navController: NavHostController,
     userViewModel: DashboardViewModel = koinViewModel()) {
-    val users by userViewModel.surah.collectAsState()
-    val hadith by userViewModel.hadith.collectAsState()
+    val users by userViewModel.ramadan.collectAsState()
     val isLoading by userViewModel.loading.collectAsState()
-    var isExpanded by remember { mutableStateOf(true) }
-    val context = LocalContext.current
+    val dataSource = CalendarDataSource()
+    var calendarUiModel: CalendarUiModel by remember { mutableStateOf(dataSource.getData(lastSelectedDate = dataSource.today)) }
+    val itemNav = listOf(NavDestination.dashboard, NavDestination.quran)
     LaunchedEffect(Unit) {
-        userViewModel.fetchSurah()
+        val dateNow = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+        } else {
+            SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Calendar.getInstance().time)
+        }
+        userViewModel.fetchRamadan(dateNow)
     }
-    Scaffold (
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "Al Qur'an",
-                        style = TextStyle(
-                            fontSize = 24.sp, // Slightly larger for emphasis
-                            fontWeight = FontWeight.Bold, // Bold for title emphasis
-                            color = Color.DarkGray, // Retain a minimalist black color
-                            letterSpacing = 1.5.sp // Adds subtle spacing for elegance
-                        ),
-                        textAlign = TextAlign.Center // Centers the text for a balanced appearance
+
+    Scaffold(
+        bottomBar = {
+            NavigationBar (
+                modifier = Modifier
+                    .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+                    .background(MaterialTheme.colorScheme.background),
+                containerColor = Color.White
+            ) {
+                val navBackStackEntry = navController.currentBackStackEntryAsState()
+                val currentDestination = navBackStackEntry.value?.destination
+                itemNav.forEach { screen ->
+                    NavigationBarItem(
+                        icon = {
+                            Icon(
+                                painter = painterResource(screen.icon), contentDescription = screen.title
+                            )
+                        },
+                        selected = currentDestination?.route == screen.route,
+                        onClick = {
+                            navController.navigate(screen.route) {
+                                popUpTo(navController.graph.id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = false
+                            }
+                        },
+                        label = { Text(screen.title) },
+                        colors = NavigationBarItemColors(
+                            selectedIconColor = Color(0xFF8ACAD4),
+                            selectedTextColor = Color(0xFF8ACAD4),
+                            selectedIndicatorColor = Color.Transparent,
+                            unselectedIconColor = Color.Gray,
+                            unselectedTextColor = Color.Gray,
+                            disabledIconColor = Color.Gray,
+                            disabledTextColor = Color.Gray
+                        )
                     )
                 }
-            )
+            }
         }
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            Color(0xFF4C94AD),
+                            Color(0xFF4C94AD),
+                            MaterialTheme.colorScheme.background,
+                            MaterialTheme.colorScheme.background
+                        )
+                    ),
+                )
                 .padding(paddingValues)
         ) {
-            Box(
-                contentAlignment = Alignment.Center
+            Column (
+                modifier = Modifier.padding(0.dp,20.dp)
             ) {
-                Column(
+                Header(
+                    data = calendarUiModel,
+                    onPrevClickListener = { startDate ->
+                        val finalStartDate = startDate.minusDays(1)
+                        calendarUiModel = dataSource.getData(startDate = finalStartDate, lastSelectedDate = calendarUiModel.selectedDate.date)
+                    },
+                    onNextClickListener = { endDate ->
+                        val finalStartDate = endDate.plusDays(2)
+                        calendarUiModel = dataSource.getData(startDate = finalStartDate, lastSelectedDate = calendarUiModel.selectedDate.date)
+                    }
+                )
+                Content(
+                    data = calendarUiModel,
+                    onDateClickListener = { date ->
+                        calendarUiModel = calendarUiModel.copy(
+                            selectedDate = date,
+                            visibleDates = calendarUiModel.visibleDates.map {
+                                it.copy(
+                                    isSelected = it.date.isEqual(date.date)
+                                )
+                            }
+                        )},
+                    userViewModel
+                )
+            }
+            Card (
+                shape = RoundedCornerShape(35.dp,35.dp,0.dp,0.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                colors = CardColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    contentColor = MaterialTheme.colorScheme.background,
+                    disabledContainerColor = Color.White,
+                    disabledContentColor = Color.White
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight()
+            ) {
+                LazyColumn(
+                    horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth()
-                        .background(
-                            color = Color(0xFF3E4A55), // Warna background
-                            shape = RoundedCornerShape(20.dp)
-                        )
-                        .padding(20.dp)
+                        .padding(paddingValues)
                 ) {
-                    // Header dengan tombol expand/minimize
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = "Daily Hadith",
-                            color = Color(0xFFB0BEC5),
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.weight(1f) // Untuk mengisi ruang kosong
-                        )
-                        Button(
-                            onClick = { isExpanded = !isExpanded }, // Toggle expanded/minimized
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color.Transparent,
-                                contentColor = Color.White
-                            ),
-                            shape = RoundedCornerShape(50)
-                        ) {
-                            Icon(
-                                imageVector = if (isExpanded) Icons.Rounded.KeyboardArrowUp else Icons.Rounded.KeyboardArrowDown,
-                                contentDescription = if (isExpanded) "Minimize" else "Expand",
-                                tint = Color.White
-                            )
+                    if (isLoading) {
+                        items(10) {
+                            ShimmerPlaceholder()
                         }
-                    }
+                    } else {
+                        items(users.size) { index ->
+                            val user = users[index].title
 
-                    // Konten yang akan disembunyikan ketika minimized
-                    if (isExpanded) {
-                        Column {
-                            Text(
-                                text = hadith?.data?.hadith_english ?: "",
-                                color = Color.White,
-                                fontSize = 14.sp,
-                                textAlign = TextAlign.Start,
-                                lineHeight = 16.sp,
-                                modifier = Modifier.padding(bottom = 5.dp)
-                            )
-                            Text(
-                                text = if(isLoading) "" else "(${hadith?.data?.refno ?: ""})",
-                                color = Color.White,
-                                fontSize = 14.sp,
-                                textAlign = TextAlign.End,
-                                lineHeight = 16.sp,
-                                modifier = Modifier.padding(bottom = 20.dp)
-                            )
-                            Button(
-                                onClick = {
-                                    val intent = Intent()
-                                    intent.action = Intent.ACTION_SEND
-                                    intent.type="text/plain"
-                                    intent.putExtra(Intent.EXTRA_TEXT, "${hadith?.data?.hadith_english} (${hadith?.data?.refno})");
+                            Column(
+                                horizontalAlignment = Alignment.Start,
 
-                                    try {
-                                        context.startActivity(Intent.createChooser(intent,"Bagikan dengan"))
-                                    } catch (e: Exception) {
-                                        // Menangani error jika tidak ada aplikasi yang mendukung
-                                        Toast.makeText(MainActivity(), "Tidak ada aplikasi yang mendukung untuk berbagi", Toast.LENGTH_SHORT).show()
-                                    }
-                                },
-                                modifier = Modifier.fillMaxWidth(),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color(0xFF546E7A), // Warna background tombol
-                                    contentColor = Color.White
-                                ),
-                                shape = RoundedCornerShape(12.dp)
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(20.dp)
                             ) {
                                 Text(
-                                    text = "Share",
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Medium
+                                    text = user,
+                                    textAlign = TextAlign.Center,
+                                    style = MaterialTheme.typography.headlineMedium.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        lineHeight = 32.sp,
+                                        fontFamily = FontFamily.Serif
+                                    ),
+                                    color = Color.Black,
+                                    modifier = Modifier.fillMaxWidth()
                                 )
                             }
-                        }
-                    }
-                }
-            }
 
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(10.dp)
-            ) {
-                if (isLoading) {
-                    items(20) { // Number of shimmer placeholders
-                        ShimmerItem()
-                    }
-                } else {
-                    items(users.size) { index ->
-                        val user = users[index]
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    navController.navigate("read/${index + 1}")
-                                }
-                                .padding(10.dp, 5.dp)
-                                .background(
-                                    color = Color(0xFFF8F4EC),
-                                    shape = RoundedCornerShape(12.dp)
-                                )
-                                .padding(15.dp)
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                // Icon with number inside a star shape
-                                Box(
-                                    contentAlignment = Alignment.Center,
-                                    modifier = Modifier
-                                        .size(30.dp)
-                                        .background(
-                                            color = Color(0xFFE6D8B5),
-                                            shape = RoundedCornerShape(50)
-                                        )
-                                ) {
-                                    Text(
-                                        text = "${index + 1}",
-                                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                                        color = Color.Black
-                                    )
-                                }
-
-                                Spacer(modifier = Modifier.width(10.dp))
-
-                                // Middle section with title and details
-                                Column(
-                                    modifier = Modifier.weight(1f)
-                                ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        modifier = Modifier.fillMaxWidth()
-                                    ) {
-                                        Text(
-                                            text = user.surahName,
-                                            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                                            color = Color(0xFF61481C)
-                                        )
-                                        Text(
-                                            text = " (${ user.surahNameTranslation })",
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = Color(0xFF8A795D)
-                                        )
-                                    }
-
-                                    Text(
-                                        text = "${user.revelationPlace} | ${user.totalAyah} Verses",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = Color(0xFF8A795D)
-                                    )
-                                }
-
-                                // Arabic name on the right
-                                Text(
-                                    text = user.surahNameArabic,
-                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                    color = Color(0xFF61481C)
-                                )
-                            }
                         }
                     }
                 }
             }
         }
     }
-
 }
+
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun ShimmerItem() {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(10.dp, 5.dp)
-            .background(
-                color = Color.Gray.copy(alpha = 0.2f),
-                shape = RoundedCornerShape(12.dp)
-            )
-            .padding(15.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
+fun Header(
+    data: CalendarUiModel,
+    onPrevClickListener: (LocalDate) -> Unit,
+    onNextClickListener: (LocalDate) -> Unit) {
+    Row (
+        modifier = Modifier.padding(15.dp)
+    ){
+        Column (
+            modifier = Modifier
+                .weight(1f)
+                .align(Alignment.Bottom)
         ) {
-            Box(
-                modifier = Modifier
-                    .size(30.dp)
-                    .background(color = Color.Gray.copy(alpha = 0.2f), shape = CircleShape)
+            Text(
+                text = formatIslamicDate(data.selectedDate.date),
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
             )
-            Spacer(modifier = Modifier.width(10.dp))
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(0.6f)
-                        .height(16.dp)
-                        .background(color = Color.Gray.copy(alpha = 0.2f))
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(0.4f)
-                        .height(12.dp)
-                        .background(color = Color.Gray.copy(alpha = 0.2f))
-                )
-            }
-            Box(
-                modifier = Modifier
-                    .width(50.dp)
-                    .height(20.dp)
-                    .background(color = Color.Gray.copy(alpha = 0.2f))
+            Text(
+                text = data.selectedDate.date.format(DateTimeFormatter.ofPattern("MMMM, yyyy")),
+                fontSize = 12.sp,
+                color = Color.White
+            )
+        }
+        IconButton(onClick = {
+            onPrevClickListener(data.startDate.date)
+
+        }) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                contentDescription = "Back",
+                tint = Color.White
+            )
+        }
+        IconButton(onClick = {
+            onNextClickListener(data.endDate.date)
+        }) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = "Next",
+                tint = Color.White
             )
         }
     }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun Content(
+    data: CalendarUiModel,
+    onDateClickListener: (CalendarUiModel.Date) -> Unit,
+    userViewModel: DashboardViewModel
+) {
+    LazyRow (
+        modifier = Modifier.padding(10.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        items(
+            items = data.visibleDates,
+            key = { date -> date.day }
+        ) { date ->
+            ContentItem(
+                date,
+                onDateClickListener,
+                userViewModel
+            )
+        }
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun ContentItem(
+    date: CalendarUiModel.Date,
+    onClickListener: (CalendarUiModel.Date) -> Unit,
+    userViewModel: DashboardViewModel
+) {
+    Card(
+        modifier = Modifier
+            .padding(4.dp)
+            .clickable {
+                date.date
+                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                    .let { formattedDate ->
+                        onClickListener(date)
+                        userViewModel.fetchRamadan(formattedDate)
+                    }
+            },
+        colors = CardDefaults.cardColors(
+            containerColor = if (date.isSelected)
+                Color(0xFF8ACAD4)
+            else
+                Color.Transparent
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .size(width = 48.dp, height = 58.dp)
+                .padding(4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = date.day,
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.White,
+                fontSize = 12.sp
+            )
+            Text(
+                text = date.date.dayOfMonth.toString(),
+                style = MaterialTheme.typography.bodyLarge,
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp
+            )
+        }
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+fun formatIslamicDate(selectedDate: LocalDate): String {
+    val hijrahDate = HijrahDate.from(selectedDate)
+    val formatter = DateTimeFormatter.ofPattern("MMMM d, yyyy 'AH'", Locale.US)
+    return hijrahDate.format(formatter)
 }
