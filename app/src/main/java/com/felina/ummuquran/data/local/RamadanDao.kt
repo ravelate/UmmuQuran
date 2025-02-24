@@ -15,4 +15,6 @@ interface RamadanDao {
     fun deleteRamadan(ramadan: Ramadan)
     @Query("SELECT * FROM ramadan where date = :date")
     fun getDataRamadanByDate(date: String): List<Ramadan>
+    @Query("UPDATE ramadan SET isDone = NOT isDone WHERE id=:id")
+    fun updateRamadanTask(id: Int)
 }

@@ -5,6 +5,7 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -23,6 +24,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -166,8 +168,7 @@ fun DashboardView(
             ) {
                 LazyColumn(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .padding(paddingValues)
+                    modifier = Modifier.weight(1f).padding(vertical = 20.dp)
                 ) {
                     if (isLoading) {
                         items(10) {
@@ -175,26 +176,11 @@ fun DashboardView(
                         }
                     } else {
                         items(users.size) { index ->
-                            val user = users[index].title
+                            val user = users[index]
 
-                            Column(
-                                horizontalAlignment = Alignment.Start,
-
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(20.dp)
-                            ) {
-                                Text(
-                                    text = user,
-                                    textAlign = TextAlign.Center,
-                                    style = MaterialTheme.typography.headlineMedium.copy(
-                                        fontWeight = FontWeight.Bold,
-                                        lineHeight = 32.sp,
-                                        fontFamily = FontFamily.Serif
-                                    ),
-                                    color = Color.Black,
-                                    modifier = Modifier.fillMaxWidth()
-                                )
+                            TaskItem(title = user.title, subtitle = user.startTime, isChecked = user.isDone) {
+                                userViewModel.fetchUpdateRamadanIsDone(user.id)
+                                userViewModel.fetchRamadan(user.date)
                             }
 
                         }
@@ -326,6 +312,53 @@ fun ContentItem(
     }
 }
 
+@Composable
+fun TaskItem(title: String, subtitle: String, isChecked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+    val alpha = if (isChecked) 0.5f else 1f
+    val backgroundColor = if (isChecked) Color(0xFFF0F0F0) else Color.White
+    val titleColor = if (isChecked) Color.Gray else Color.Black
+    val subtitleColor = if (isChecked) Color(0xFFB0B0B0) else Color(0xFFA0A0A0)
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 5.dp, horizontal = 20.dp)
+            .alpha(alpha),
+    ) {
+        Row(
+            modifier = Modifier
+                .background(backgroundColor, shape = RoundedCornerShape(12.dp))
+                .padding(15.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = title,
+                    color = titleColor,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
+                )
+                Text(
+                    text = subtitle,
+                    color = subtitleColor,
+                    fontSize = 14.sp
+                )
+            }
+
+            Checkbox(
+                checked = isChecked,
+                onCheckedChange = onCheckedChange,
+                colors = CheckboxDefaults.colors(
+                    checkedColor = Color(0xFF4C94AD),
+                    uncheckedColor = Color(0xFF787878),
+                    checkmarkColor = Color.White
+                )
+            )
+        }
+    }
+}
 @RequiresApi(Build.VERSION_CODES.O)
 fun formatIslamicDate(selectedDate: LocalDate): String {
     val hijrahDate = HijrahDate.from(selectedDate)
