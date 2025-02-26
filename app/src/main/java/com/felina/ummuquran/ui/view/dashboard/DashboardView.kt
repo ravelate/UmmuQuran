@@ -1,6 +1,10 @@
 package com.felina.ummuquran.ui.view.dashboard
 
 import android.os.Build
+import android.Manifest
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -25,6 +29,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -57,6 +62,7 @@ fun DashboardView(
     val users by userViewModel.ramadan.collectAsState()
     val isLoading by userViewModel.loading.collectAsState()
     val dataSource = CalendarDataSource()
+    val context = LocalContext.current
     var calendarUiModel: CalendarUiModel by remember { mutableStateOf(dataSource.getData(lastSelectedDate = dataSource.today)) }
     val itemNav = listOf(NavDestination.dashboard, NavDestination.quran)
 
@@ -71,13 +77,19 @@ fun DashboardView(
     var timeSelected by remember { mutableStateOf("") }
     var priorityData by remember { mutableStateOf("") }
 
-    LaunchedEffect(Unit) {
-        val dateNow = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-        } else {
-            SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Calendar.getInstance().time)
+    var hasPermission by remember { mutableStateOf(false) }
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        hasPermission = isGranted
+        if (!isGranted) {
+            Toast.makeText(context, "Notification permission denied", Toast.LENGTH_SHORT).show()
         }
-        userViewModel.fetchRamadan(dateNow)
+    }
+
+    LaunchedEffect(Unit) {
+        permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        userViewModel.fetchRamadan(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
     }
 
     Scaffold(

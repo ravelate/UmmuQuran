@@ -2,6 +2,7 @@
 accompanistPlaceholderMaterial = "0.36.0"
 agp = "8.7.2"
 converterGson = "2.9.0"
+coreKtxVersion = "1.15.0"
 koinAndroid = "3.4.0"
 koinAndroidxCompose = "3.4.0"
 kotlin = "2.0.0"
@@ -18,14 +19,17 @@ retrofit = "2.9.0"
 roomKtx = "2.6.1"
 roomRuntime = "2.6.1"
 ummalquraCalendar = "1.1.6"
+workRuntimeKtx = "2.10.0"
 
 [libraries]
 accompanist-placeholder-material = { module = "com.google.accompanist:accompanist-placeholder-material", version.ref = "accompanistPlaceholderMaterial" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-core-ktx-v1150 = { module = "androidx.core:core-ktx", version.ref = "coreKtxVersion" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomKtx" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
+androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

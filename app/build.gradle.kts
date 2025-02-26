@@ -58,6 +58,9 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     kapt("androidx.room:room-compiler:2.6.1")
+    // workmanager
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.core.ktx.v1150)
 
     //islamic date
     implementation(libs.ummalqura.calendar)
