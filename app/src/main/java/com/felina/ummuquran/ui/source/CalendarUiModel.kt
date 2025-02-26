@@ -3,7 +3,8 @@ package com.felina.ummuquran.ui.source
 import android.os.Build
 import androidx.annotation.RequiresApi
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
+import java.time.format.TextStyle
+import java.util.Locale
 
 data class CalendarUiModel(
     val selectedDate: Date,
@@ -19,6 +20,6 @@ data class CalendarUiModel(
         val isToday: Boolean
     ) {
         @RequiresApi(Build.VERSION_CODES.O)
-        val day: String = date.format(DateTimeFormatter.ofPattern("E"))
+        val day: String = date.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale("id", "ID"))
     }
 }

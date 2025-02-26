@@ -6,15 +6,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -52,7 +44,6 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.chrono.HijrahDate
 import java.time.format.DateTimeFormatter
-import java.time.format.TextStyle
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
@@ -134,16 +125,16 @@ fun DashboardView(
             if (!showDialog) {
                 FloatingActionButton (
                     onClick = {
-                        showDialog = true;
+                        showDialog = true
                     },
                     containerColor = Color.White, // Set FAB background color to white
-                    contentColor = Color(0xFF4C94AD), // Set icon color to blue
+                    contentColor = Color(0xFF62B3BF), // Set icon color to blue
                     modifier = Modifier.padding(16.dp)
                 ){
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = "Add",
-                        tint = Color(0xFF4C94AD)
+                        tint = Color(0xFF62B3BF)
                     )
                 }
             }
@@ -155,8 +146,8 @@ fun DashboardView(
                 .background(
                     brush = Brush.verticalGradient(
                         colors = listOf(
-                            Color(0xFF4C94AD),
-                            Color(0xFF4C94AD),
+                            Color(0xFF62B3BF),
+                            Color(0xFF62B3BF),
                             MaterialTheme.colorScheme.background,
                             MaterialTheme.colorScheme.background
                         )
@@ -167,9 +158,9 @@ fun DashboardView(
             Column (
                 modifier = Modifier.padding(0.dp,20.dp,0.dp,0.dp)
             ) {
-                Box() {
+                Box {
                     Box(
-                        modifier = Modifier.fillMaxWidth().height(280.dp)
+                        modifier = Modifier.fillMaxWidth().height(260.dp)
                     ) {
                         Image(
                             painter = painterResource(id = R.drawable.mosque), // Replace with your PNG resource
@@ -446,7 +437,7 @@ fun ContentItem(
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = date.date.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale("id", "ID")),
+                text = date.day,
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.White,
                 fontSize = 12.sp
@@ -501,7 +492,7 @@ fun TaskItem(title: String, subtitle: String, isChecked: Boolean, onCheckedChang
                 checked = isChecked,
                 onCheckedChange = onCheckedChange,
                 colors = CheckboxDefaults.colors(
-                    checkedColor = Color(0xFF4C94AD),
+                    checkedColor = Color(0xFF62B3BF),
                     uncheckedColor = Color(0xFF787878),
                     checkmarkColor = Color.White
                 )
@@ -588,7 +579,7 @@ fun TaskForm(
             Button(
                 onClick = { onSubmit(true) },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF4C94AD),
+                    containerColor = Color(0xFF62B3BF),
                     contentColor = Color.White
                 ),
                 modifier = Modifier
@@ -675,7 +666,7 @@ fun PriorityButton(text: String, isSelected: Boolean, onClick: () -> Unit, modif
     Button(
         onClick = onClick,
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (isSelected) Color(0xFF4C94AD) else Color.LightGray
+            containerColor = if (isSelected) Color(0xFF62B3BF) else Color.LightGray
         ),
         shape = RoundedCornerShape(8.dp),
         modifier = modifier
