@@ -2,6 +2,7 @@ package com.felina.ummuquran.ui.view.dashboard
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -30,15 +32,16 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.felina.ummuquran.R
 import com.felina.ummuquran.ui.source.CalendarDataSource
 import com.felina.ummuquran.ui.source.CalendarUiModel
 import com.felina.ummuquran.ui.view.NavDestination
@@ -49,6 +52,7 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.chrono.HijrahDate
 import java.time.format.DateTimeFormatter
+import java.time.format.TextStyle
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
@@ -161,161 +165,178 @@ fun DashboardView(
                 .padding(paddingValues)
         ) {
             Column (
-                modifier = Modifier.padding(0.dp,20.dp)
+                modifier = Modifier.padding(0.dp,20.dp,0.dp,0.dp)
             ) {
-                Header(
-                    data = calendarUiModel,
-                    onPrevClickListener = { startDate ->
-                        val finalStartDate = startDate.minusDays(1)
-                        calendarUiModel = dataSource.getData(startDate = finalStartDate, lastSelectedDate = calendarUiModel.selectedDate.date)
-                    },
-                    onNextClickListener = { endDate ->
-                        val finalStartDate = endDate.plusDays(2)
-                        calendarUiModel = dataSource.getData(startDate = finalStartDate, lastSelectedDate = calendarUiModel.selectedDate.date)
-                    }
-                )
-                Content(
-                    data = calendarUiModel,
-                    onDateClickListener = { date ->
-                        calendarUiModel = calendarUiModel.copy(
-                            selectedDate = date,
-                            visibleDates = calendarUiModel.visibleDates.map {
-                                it.copy(
-                                    isSelected = it.date.isEqual(date.date)
-                                )
-                            }
-                        )},
-                    userViewModel
-                )
-            }
-            Card (
-                shape = RoundedCornerShape(35.dp,35.dp,0.dp,0.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-                colors = CardColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    contentColor = MaterialTheme.colorScheme.background,
-                    disabledContainerColor = Color.White,
-                    disabledContentColor = Color.White
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight()
-            ) {
-                if(showDialog) {
-                    Column (
-                        modifier = Modifier.weight(1f).padding(vertical = 20.dp)
-                    ){
-                        if (showDatePicker) {
-                            MyDatePickerDialog(
-                                onDateSelected = { dateData = it },
-                                onDismiss = { showDatePicker = false }
-                            )
-                        }
-                        if (showTimePicker) {
-                            Dialog(
-                                onDismissRequest = { showTimePicker = false },
-                                properties = DialogProperties(usePlatformDefaultWidth = true)
-                            ) {
-                                ElevatedCard(
-                                    modifier = Modifier
-                                        .background(color = MaterialTheme.colorScheme.surface,
-                                            shape = MaterialTheme.shapes.extraLarge),
-                                    elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
-                                    shape = MaterialTheme.shapes.extraLarge
-                                ) {
-                                    Column(
-                                        modifier = Modifier.padding(16.dp),
-                                    ) {
-                                        Text(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(16.dp),
-                                            text = "Select time"
-                                        )
-                                        TimePicker(
-                                            state = timeState,
-                                            layoutType = TimePickerLayoutType.Vertical,
-                                        )
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            horizontalArrangement = Arrangement.End
-                                        ) {
-                                            Button(
-                                                modifier = Modifier.padding(end = 8.dp),
-                                                onClick = { showTimePicker = false }
-                                            ) {
-                                                Text(
-                                                    text = "Cancel"
-                                                )
-                                            }
-                                            Button(
-                                                modifier = Modifier.padding(start = 8.dp),
-                                                onClick = {
-                                                    timeSelected = formattedTime(timeState.hour, timeState.minute)
-                                                    showTimePicker = false
-                                                }
-                                            ) {
-                                                Text(text = "OK")
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        TaskForm(
-                            onTitleChange = {
-                                titleData = it
-                            },
-                            title = titleData,
-                            onDatePickerShow = {
-                                showDatePicker = it
-                            },
-                            date = dateData,
-                            onTimePickerShow = {
-                                showTimePicker = it
-                            },
-                            time = timeSelected,
-                            onPriorityChange = {
-                                priorityData = it
-                            },
-                            priority = priorityData,
-                            onSubmit = {
-                                if(it) {
-                                    userViewModel.insertRamadan(
-                                        title = titleData,
-                                        date = dateData,
-                                        startTime = timeSelected,
-                                        priority = priorityData
-                                    )
-                                    userViewModel.fetchRamadan(calendarUiModel.selectedDate.date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
-                                }
-                                showDialog = false
-                            }
+                Box() {
+                    Box(
+                        modifier = Modifier.fillMaxWidth().height(280.dp)
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.mosque), // Replace with your PNG resource
+                            contentDescription = "Background Image",
+                            contentScale = ContentScale.Crop,
                         )
                     }
-                }else {
-                    LazyColumn(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.weight(1f).padding(vertical = 20.dp)
-                    ) {
-                        if (isLoading) {
-                            items(10) {
-                                ShimmerPlaceholder()
-                            }
-                        } else {
-                            items(users.size) { index ->
-                                val user = users[index]
+                   Column (
+                       modifier = Modifier.padding(0.dp,30.dp,0.dp,0.dp)
+                   ){
+                       Header(
+                           data = calendarUiModel,
+                           onPrevClickListener = { startDate ->
+                               val finalStartDate = startDate.minusDays(1)
+                               calendarUiModel = dataSource.getData(startDate = finalStartDate, lastSelectedDate = calendarUiModel.selectedDate.date)
+                           },
+                           onNextClickListener = { endDate ->
+                               val finalStartDate = endDate.plusDays(2)
+                               calendarUiModel = dataSource.getData(startDate = finalStartDate, lastSelectedDate = calendarUiModel.selectedDate.date)
+                           }
+                       )
+                       Content(
+                           data = calendarUiModel,
+                           onDateClickListener = { date ->
+                               calendarUiModel = calendarUiModel.copy(
+                                   selectedDate = date,
+                                   visibleDates = calendarUiModel.visibleDates.map {
+                                       it.copy(
+                                           isSelected = it.date.isEqual(date.date)
+                                       )
+                                   }
+                               )},
+                           userViewModel
+                       )
+                       Card (
+                           shape = RoundedCornerShape(35.dp,35.dp,0.dp,0.dp),
+                           elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                           colors = CardColors(
+                               containerColor = MaterialTheme.colorScheme.background,
+                               contentColor = MaterialTheme.colorScheme.background,
+                               disabledContainerColor = Color.White,
+                               disabledContentColor = Color.White
+                           ),
+                           modifier = Modifier
+                               .fillMaxWidth()
+                               .fillMaxHeight()
+                       ) {
+                           if(showDialog) {
+                               Column (
+                                   modifier = Modifier.weight(1f).padding(vertical = 20.dp)
+                               ){
+                                   if (showDatePicker) {
+                                       MyDatePickerDialog(
+                                           onDateSelected = { dateData = it },
+                                           onDismiss = { showDatePicker = false }
+                                       )
+                                   }
+                                   if (showTimePicker) {
+                                       Dialog(
+                                           onDismissRequest = { showTimePicker = false },
+                                           properties = DialogProperties(usePlatformDefaultWidth = true)
+                                       ) {
+                                           ElevatedCard(
+                                               modifier = Modifier
+                                                   .background(color = MaterialTheme.colorScheme.surface,
+                                                       shape = MaterialTheme.shapes.extraLarge),
+                                               elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
+                                               shape = MaterialTheme.shapes.extraLarge
+                                           ) {
+                                               Column(
+                                                   modifier = Modifier.padding(16.dp),
+                                               ) {
+                                                   Text(
+                                                       modifier = Modifier
+                                                           .fillMaxWidth()
+                                                           .padding(16.dp),
+                                                       text = "Pilih Jam"
+                                                   )
+                                                   TimePicker(
+                                                       state = timeState,
+                                                       layoutType = TimePickerLayoutType.Vertical,
+                                                   )
+                                                   Row(
+                                                       modifier = Modifier.fillMaxWidth(),
+                                                       horizontalArrangement = Arrangement.End
+                                                   ) {
+                                                       Button(
+                                                           modifier = Modifier.padding(end = 8.dp),
+                                                           onClick = { showTimePicker = false }
+                                                       ) {
+                                                           Text(
+                                                               text = "Cancel"
+                                                           )
+                                                       }
+                                                       Button(
+                                                           modifier = Modifier.padding(start = 8.dp),
+                                                           onClick = {
+                                                               timeSelected = formattedTime(timeState.hour, timeState.minute)
+                                                               showTimePicker = false
+                                                           }
+                                                       ) {
+                                                           Text(text = "OK")
+                                                       }
+                                                   }
+                                               }
+                                           }
+                                       }
+                                   }
+                                   TaskForm(
+                                       onTitleChange = {
+                                           titleData = it
+                                       },
+                                       title = titleData,
+                                       onDatePickerShow = {
+                                           showDatePicker = it
+                                       },
+                                       date = dateData,
+                                       onTimePickerShow = {
+                                           showTimePicker = it
+                                       },
+                                       time = timeSelected,
+                                       onPriorityChange = {
+                                           priorityData = it
+                                       },
+                                       priority = priorityData,
+                                       onSubmit = {
+                                           if(it) {
+                                               userViewModel.insertRamadan(
+                                                   title = titleData,
+                                                   date = dateData,
+                                                   startTime = timeSelected,
+                                                   priority = priorityData
+                                               )
+                                               userViewModel.fetchRamadan(calendarUiModel.selectedDate.date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                                           }
+                                           showDialog = false
+                                       }
+                                   )
+                               }
+                           }else {
+                               LazyColumn(
+                                   horizontalAlignment = Alignment.CenterHorizontally,
+                                   modifier = Modifier.weight(1f).padding(vertical = 20.dp)
+                               ) {
+                                   if (isLoading) {
+                                       items(10) {
+                                           ShimmerPlaceholder()
+                                       }
+                                   } else {
+                                       items(users.size) { index ->
+                                           val user = users[index]
 
-                                TaskItem(title = user.title, subtitle = user.startTime, isChecked = user.isDone) {
-                                    userViewModel.fetchUpdateRamadanIsDone(user.id)
-                                    userViewModel.fetchRamadan(user.date)
-                                }
+                                           TaskItem(title = user.title, subtitle = user.startTime, isChecked = user.isDone) {
+                                               userViewModel.fetchUpdateRamadanIsDone(user.id)
+                                               userViewModel.fetchRamadan(user.date)
+                                           }
 
-                            }
-                        }
-                    }
+                                       }
+                                   }
+                               }
+                           }
+                       }
+                   }
+
                 }
             }
+
         }
     }
 }
@@ -425,7 +446,7 @@ fun ContentItem(
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = date.day,
+                text = date.date.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale("id", "ID")),
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.White,
                 fontSize = 12.sp
@@ -585,7 +606,7 @@ fun TaskForm(
 fun MyDatePickerDialog(
     onDateSelected: (String) -> Unit,
     onDismiss: () -> Unit
-) {
+)  {
     val datePickerState = rememberDatePickerState(selectableDates = object : SelectableDates {})
 
     val selectedDate = datePickerState.selectedDateMillis?.let {
