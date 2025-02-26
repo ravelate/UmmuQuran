@@ -41,4 +41,22 @@ class DashboardViewModel(private val repository: RamadanDao) : ViewModel() {
             }
         }
     }
+    fun insertRamadan(title: String, date: String, startTime: String, priority: String) {
+        viewModelScope.launch {
+            _loading.value = true
+            try {
+                repository.insertRamadan(Ramadan(
+                    title = title,
+                    date = date,
+                    startTime = startTime,
+                    priorityLevel = priority,
+                    isDone = false
+                ));
+            } catch (e: Exception) {
+                Log.e("EEE",e.toString())
+            } finally {
+                _loading.value = false
+            }
+        }
+    }
 }
