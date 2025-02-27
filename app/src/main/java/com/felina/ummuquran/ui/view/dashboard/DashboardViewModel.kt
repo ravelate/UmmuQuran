@@ -1,7 +1,9 @@
 package com.felina.ummuquran.ui.view.dashboard
 
 import android.content.Context
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.felina.ummuquran.data.local.Ramadan
@@ -13,6 +15,10 @@ import androidx.work.Data
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.felina.ummuquran.notification.NotificationWorker
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZoneId
 import java.util.concurrent.TimeUnit
 
 class DashboardViewModel(private val repository: RamadanDao) : ViewModel() {
@@ -47,7 +53,8 @@ class DashboardViewModel(private val repository: RamadanDao) : ViewModel() {
             }
         }
     }
-    fun insertRamadan(title: String, date: String, startTime: String, priority: String) {
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun insertRamadan(context: Context, title: String, date: String, startTime: String, priority: String) {
         viewModelScope.launch {
             _loading.value = true
             try {
@@ -58,6 +65,12 @@ class DashboardViewModel(private val repository: RamadanDao) : ViewModel() {
                     priorityLevel = priority,
                     isDone = false
                 ));
+                scheduleNotification(
+                    context = context,
+                    timeInMillis = convertToMillis(dateString = date, timeString = startTime),
+                    title = title,
+                    message = "Reminder",
+                )
             } catch (e: Exception) {
                 Log.e("EEE",e.toString())
             } finally {
@@ -83,5 +96,13 @@ class DashboardViewModel(private val repository: RamadanDao) : ViewModel() {
             .build()
 
         WorkManager.getInstance(context).enqueue(workRequest)
+    }
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun convertToMillis(dateString: String, timeString: String): Long {
+        val date = LocalDate.parse(dateString)
+        val time = LocalTime.parse(timeString)
+
+        val dateTime = LocalDateTime.of(date, time)
+        return dateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
     }
 }

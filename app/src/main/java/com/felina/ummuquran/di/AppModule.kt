@@ -1,9 +1,15 @@
 package com.felina.ummuquran.di
 
 import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.compose.ui.platform.LocalContext
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
+import androidx.work.Data
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import com.felina.ummuquran.R
 import com.felina.ummuquran.data.local.Ramadan
 import com.felina.ummuquran.data.local.RamadanDao
@@ -12,6 +18,7 @@ import com.felina.ummuquran.data.network.ApiClient
 import com.felina.ummuquran.data.network.ApiService
 import com.felina.ummuquran.data.network.ApiService2
 import com.felina.ummuquran.data.repository.QuranRepository
+import com.felina.ummuquran.notification.NotificationWorker
 import com.felina.ummuquran.ui.view.dashboard.DashboardViewModel
 import com.felina.ummuquran.ui.view.quran.QuranViewModel
 import com.felina.ummuquran.ui.view.read.ReadViewModel
@@ -26,6 +33,11 @@ import org.koin.dsl.module
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZoneId
+import java.util.concurrent.TimeUnit
 
 val appModule = module {
     // Provide ApiService
@@ -72,6 +84,7 @@ fun provideDao(database: RamadanDatabase): RamadanDao {
     return database.ramadanDao()
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 private fun fillWithStartingData(context: Context, dao: RamadanDao) {
     val jsonArray = loadJsonArray(context)
     try {
@@ -87,6 +100,12 @@ private fun fillWithStartingData(context: Context, dao: RamadanDao) {
                         item.getString("priorityLevel"),
                         false
                     )
+                )
+                scheduleNotification(
+                    context = context,
+                    timeInMillis = convertToMillis(dateString = item.getString("date"), timeString = item.getString("startTime")),
+                    title = item.getString("title"),
+                    message = "Reminder",
                 )
             }
         }
@@ -112,4 +131,31 @@ private fun loadJsonArray(context: Context): JSONArray? {
         exception.printStackTrace()
     }
     return null
+}
+
+fun scheduleNotification(context: Context, timeInMillis: Long, title: String, message: String) {
+    val currentTime = System.currentTimeMillis()
+    val delay = timeInMillis - currentTime
+
+    if (delay <= 0) return
+
+    val data = Data.Builder()
+        .putString("title", title)
+        .putString("message", message)
+        .build()
+
+    val workRequest = OneTimeWorkRequestBuilder<NotificationWorker>()
+        .setInitialDelay(delay, TimeUnit.MILLISECONDS)
+        .setInputData(data)
+        .build()
+
+    WorkManager.getInstance(context).enqueue(workRequest)
+}
+@RequiresApi(Build.VERSION_CODES.O)
+fun convertToMillis(dateString: String, timeString: String): Long {
+    val date = LocalDate.parse(dateString)
+    val time = LocalTime.parse(timeString)
+
+    val dateTime = LocalDateTime.of(date, time)
+    return dateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
 }

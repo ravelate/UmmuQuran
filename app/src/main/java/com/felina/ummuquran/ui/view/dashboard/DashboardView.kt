@@ -15,7 +15,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -39,6 +41,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.felina.ummuquran.R
+import com.felina.ummuquran.data.utils.NotificationHelper
 import com.felina.ummuquran.ui.source.CalendarDataSource
 import com.felina.ummuquran.ui.source.CalendarUiModel
 import com.felina.ummuquran.ui.view.NavDestination
@@ -301,6 +304,7 @@ fun DashboardView(
                                        onSubmit = {
                                            if(it) {
                                                userViewModel.insertRamadan(
+                                                   context = context,
                                                    title = titleData,
                                                    date = dateData,
                                                    startTime = timeSelected,
@@ -312,7 +316,8 @@ fun DashboardView(
                                        }
                                    )
                                }
-                           }else {
+                           }
+                           else {
                                LazyColumn(
                                    horizontalAlignment = Alignment.CenterHorizontally,
                                    modifier = Modifier.weight(1f).padding(vertical = 20.dp)
@@ -529,8 +534,9 @@ fun TaskForm(
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .verticalScroll(rememberScrollState())
             .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text("Nama Kegiatan", fontWeight = FontWeight.Bold, color = Color.Gray)
         OutlinedTextField(

@@ -2,80 +2,80 @@
   "ramadan": [
     {
       "id": 1,
-      "title": "Reading book",
+      "title": "Pray at Mosque",
       "date": "2025-02-28",
-      "startTime": "16:00",
+      "startTime": "04:30",
       "priorityLevel": "High"
     },
     {
       "id": 2,
-      "title": "Walking every morning",
+      "title": "Taraweeh",
       "date": "2025-02-28",
-      "startTime": "06:30",
+      "startTime": "19:00",
       "priorityLevel": "Medium"
     },
     {
       "id": 3,
-      "title": "Coding practice",
-      "date": "2025-02-28",
-      "startTime": "10:00",
+      "title": "Reading Al-Qur'an",
+      "date": "2025-03-01",
+      "startTime": "05:00",
       "priorityLevel": "High"
     },
     {
       "id": 4,
-      "title": "Writing journal",
-      "date": "2025-02-28",
+      "title": "Charity",
+      "date": "2025-03-01",
       "startTime": "20:30",
-      "priorityLevel": "Low"
-    },
-    {
-      "id": 5,
-      "title": "Self Retrospection",
-      "date": "2025-02-28",
-      "startTime": "21:00",
-      "priorityLevel": "Low"
-    },
-    {
-      "id": 6,
-      "title": "Coding practice",
-      "date": "2025-02-28",
-      "startTime": "10:00",
       "priorityLevel": "High"
     },
     {
+      "id": 5,
+      "title": "I'tikaf",
+      "date": "2025-03-21",
+      "startTime": "21:00",
+      "priorityLevel": "Medium"
+    },
+    {
+      "id": 6,
+      "title": "Tahajud",
+      "date": "2025-03-01",
+      "startTime": "02:00",
+      "priorityLevel": "Medium"
+    },
+    {
       "id": 7,
-      "title": "Writing journal",
-      "date": "2025-02-28",
-      "startTime": "20:30",
-      "priorityLevel": "Low"
+      "title": "Sharing Takjil",
+      "date": "2025-03-02",
+      "startTime": "17:00",
+      "priorityLevel": "Medium"
     },
     {
       "id": 8,
-      "title": "Self Retrospection",
-      "date": "2025-02-28",
+      "title": "Ngabuburit",
+      "date": "2025-03-02",
       "startTime": "21:00",
       "priorityLevel": "Low"
     },
     {
       "id": 9,
-      "title": "Coding practice",
-      "date": "2025-02-28",
-      "startTime": "10:00",
+      "title": "Study",
+      "date": "2025-03-01",
+      "startTime": "21:00",
       "priorityLevel": "High"
     },
     {
       "id": 10,
-      "title": "Writing journal",
-      "date": "2025-02-28",
-      "startTime": "20:30",
-      "priorityLevel": "Low"
+      "title": "Zakat",
+      "date": "2025-03-01",
+      "startTime": "21:00",
+      "priorityLevel": "High"
     },
     {
       "id": 11,
-      "title": "Self Retrospection",
-      "date": "2025-02-28",
-      "startTime": "21:00",
-      "priorityLevel": "Low"
+      "title": "Sunnah Prayer",
+      "date": "2025-03-01",
+      "startTime": "05:45",
+      "priorityLevel": "Medium"
     }
   ]
 }
