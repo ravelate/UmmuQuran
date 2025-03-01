@@ -13,7 +13,7 @@ interface RamadanDao {
     fun insertAll(vararg ramadans: Ramadan)
     @Delete(entity = Ramadan::class)
     fun deleteRamadan(ramadan: Ramadan)
-    @Query("SELECT * FROM ramadan where date = :date")
+    @Query("SELECT * FROM ramadan where date = :date ORDER BY startTime")
     fun getDataRamadanByDate(date: String): List<Ramadan>
     @Query("UPDATE ramadan SET isDone = NOT isDone WHERE id=:id")
     fun updateRamadanTask(id: Int)
